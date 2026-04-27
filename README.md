@@ -164,6 +164,7 @@ flipper_oregon_trail/
 ├── sprites.c / sprites.h — Pixel art: wagon, stickman, animals, skull, tombstone, wolf
 ├── sound.c / sound.h     — Sound sequences via Flipper piezo buzzer
 └── icon.png              — 10×10 FAP icon
+└── oregon_trail.fap      — Compiled Application
 
 ---
 
