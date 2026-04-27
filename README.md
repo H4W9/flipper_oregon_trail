@@ -129,7 +129,13 @@ The trail landscape changes as you travel:
 | Desert | 1,200–1,600 | Flat horizon, cacti |
 | Forest | 1,600–2,000 | Pine silhouettes |
 
----
+## Quick Install (no build required)
+
+1. Download `oregon_trail.fap` from this repository
+2. Copy it to your Flipper SD card at `apps/Games/oregon_trail.fap`
+3. Launch from the Apps menu → Games
+
+Compiled against Unleashed firmware. May require a firmware update if you see API version errors.
 
 ## Building
 
