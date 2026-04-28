@@ -285,6 +285,20 @@ static const EventDef EVENTS[] = {
         .weight_mountain = 0,  .weight_desert = 0,
     },
 
+    {
+        .header = "WILDFIRE!",
+        .body   = { "Smoke fills the air.", "The trail is cut off.",
+                    "Wait for it to pass.", NULL },
+        .choices = {
+            { "Wait 1 day", 1, 20, 0, 0.0f, false },  // 20 food lost, provisions used fighting it
+        },
+        .num_choices     = 1, .player_index = -1,
+        .weight_base     = 0,  .weight_low_food = 0,
+        .weight_grueling = 0,  .weight_bad_weather = 5,
+        .weight_mountain = 0,  .weight_desert = 3,   // also fires in desert
+        // primary trigger: forest zone via weather_risk[FOREST][Jul-Oct] = 2-6
+    },
+
     // ── Supplies warning ──────────────────────────────────────
     {
         .header = "! SUPPLIES LOW",
@@ -433,9 +447,9 @@ DayResult day_advance(GameState* gs, ActiveEvent* ev) {
     // Random event — fires roughly every 5-7 days on average
     // Roll 1-10; event fires on 1-2 (20% chance per day).
     // Grueling pace raises to 30%, low food raises to 35%.
-    int event_threshold = 2;
-    if(t->pace == 3)      event_threshold++;
-    if(t->food_lbs < 50)  event_threshold++;
+    int event_threshold = 3;                    // 30% base (up from 20%)
+    if(t->pace == 3)      event_threshold += 2; // grueling: +20%
+    if(t->food_lbs < 50)  event_threshold += 2; // low food: +20%
 
     int roll = rng_range(1, 10);
     if(roll <= event_threshold) {
@@ -502,7 +516,7 @@ void day_rest(GameState* gs, int* food_used_out) {
     for(int i = 0; i < gs->num_players; i++)
         if(gs->players[i].hp > 0.0f) living++;
     int food_per = FOOD_PER_PLAYER_PER_DAY[t->rations];
-    int consumed = food_per * living;
+    int consumed = (food_per * 3 / 2) * living;  // 1.5x normal — resting still eats
     t->food_lbs  = (t->food_lbs > consumed) ? t->food_lbs - consumed : 0;
 
     for(int i = 0; i < gs->num_players; i++) {

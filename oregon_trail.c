@@ -483,9 +483,9 @@ static int build_fort_items(FortItem items[], const GameState* gs) {
     for(int i = 0; i < gs->num_players && n < FORT_MAX_ITEMS; i++) {
         const Player* p = &gs->players[i];
         if(p->hp > 0.0f && p->hp < MAX_HP_F) {
-            items[n] = (FortItem){ .money_delta=-20, .available=(t->money>=20) };
+            items[n] = (FortItem){ .money_delta=-25, .available=(t->money>=25) };
             items[n].hp_delta[i] = 2.0f;
-            snprintf(items[n].label, 32, "Medicine: %s  $20", p->name);
+            snprintf(items[n].label, 32, "Medicine: %s  $25", p->name);
             n++;
         }
     }
@@ -851,7 +851,7 @@ static void game_reset(App* app) {
     app->gs.players[1].hp    = MAX_HP_F;
     app->gs.players[1].alive = true;
     app->gs.trail = (Trail){
-        .food_lbs=250, .money=124, .day=3, .month=5, .miles=0,
+        .food_lbs=250, .money=100, .day=3, .month=5, .miles=0,
         .pace=1, .rations=1, .recent_rain=false,
         .ammo=20, .last_fort_visited=-1, .rivers_visited=0
     };
@@ -884,7 +884,7 @@ int32_t oregon_trail_app(void* p) {
     app->gs.players[1].hp    = MAX_HP_F;
     app->gs.players[1].alive = true;
     app->gs.trail = (Trail){
-        .food_lbs=250, .money=124, .day=3, .month=5, .miles=0,
+        .food_lbs=250, .money=100, .day=3, .month=5, .miles=0,
         .pace=1, .rations=1, .recent_rain=false,
         .ammo=20, .last_fort_visited=-1, .rivers_visited=0
     };

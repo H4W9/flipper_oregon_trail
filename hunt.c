@@ -21,9 +21,9 @@ typedef struct {
 
 static const SpeciesParams PARAMS[5] = {
     [SPECIES_RABBIT]  = { .base_y=29, .y_amp=5,  .y_spd=0.00140f, .x_spd=0.034f, .meat_lo=2,   .meat_hi=6   },
-    [SPECIES_DEER]    = { .base_y=22, .y_amp=7,  .y_spd=0.00080f, .x_spd=0.020f, .meat_lo=40,  .meat_hi=80  },
+    [SPECIES_DEER]    = { .base_y=22, .y_amp=7,  .y_spd=0.00080f, .x_spd=0.020f, .meat_lo=25,  .meat_hi=50  },
     [SPECIES_BUFFALO] = { .base_y=23, .y_amp=6,  .y_spd=0.00050f, .x_spd=0.011f, .meat_lo=100, .meat_hi=200 },
-    [SPECIES_ELK]     = { .base_y=22, .y_amp=7,  .y_spd=0.00080f, .x_spd=0.018f, .meat_lo=50,  .meat_hi=100 },
+    [SPECIES_ELK]     = { .base_y=22, .y_amp=7,  .y_spd=0.00080f, .x_spd=0.018f, .meat_lo=30,  .meat_hi=60  },
     [SPECIES_WOLF]    = { .base_y=26, .y_amp=8,  .y_spd=0.00120f, .x_spd=0.028f, .meat_lo=20,  .meat_hi=40  },
 };
 
