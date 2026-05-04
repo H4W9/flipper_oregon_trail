@@ -853,7 +853,7 @@ static void game_reset(App* app) {
     app->gs.trail = (Trail){
         .food_lbs=250, .money=100, .day=3, .month=5, .miles=0,
         .pace=1, .rations=1, .recent_rain=false,
-        .ammo=20, .last_fort_visited=-1, .rivers_visited=0
+        .ammo=20, .last_fort_visited=-1, .rivers_visited=0, .grueling_days=0, .trail_hardship=0
     };
     memset(&app->active_event, 0, sizeof(ActiveEvent));
     hunt_init(&app->hunt);
@@ -863,7 +863,8 @@ static void game_reset(App* app) {
     app->hold_advance_ms = 0;
     app->fort_cursor     = 0;
     app->confirm_exit    = false;
-    app->gs.trail.rivers_visited = 0;
+    app->gs.trail.rivers_visited  = 0;
+    app->gs.trail.trail_hardship  = 0;
 }
 
 // ── Game loop ─────────────────────────────────────────────────
@@ -886,7 +887,7 @@ int32_t oregon_trail_app(void* p) {
     app->gs.trail = (Trail){
         .food_lbs=250, .money=100, .day=3, .month=5, .miles=0,
         .pace=1, .rations=1, .recent_rain=false,
-        .ammo=20, .last_fort_visited=-1, .rivers_visited=0
+        .ammo=20, .last_fort_visited=-1, .rivers_visited=0, .grueling_days=0, .trail_hardship=0
     };
 
     // Name edit state — cursor starts on "Start Game" (row 2)
@@ -1063,11 +1064,14 @@ int32_t oregon_trail_app(void* p) {
                     }
                     if(is_press && ev.key == InputKeyRight) {
                         if(app->confirm_exit) {
-                            app->confirm_exit = false; // Back cancels
+                            app->confirm_exit = false;
                         } else {
                             Region r = region_from_miles(app->gs.trail.miles);
                             bool off = (r != REGION_PRAIRIE && r != REGION_PLAINS);
+                            int saved_ammo = app->gs.trail.ammo; // ammo lives in Trail
+                            hunt_init(&app->hunt);               // clears msg, meat, wolf flags
                             hunt_set_region(&app->hunt, off);
+                            app->gs.trail.ammo = saved_ammo;     // restore — init doesn't touch Trail
                             app->gs.screen = SCREEN_HUNT;
                         }
                     }
