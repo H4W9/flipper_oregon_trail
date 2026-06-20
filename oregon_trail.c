@@ -12,6 +12,7 @@
 #include "event_draw.h"
 #include "river.h"
 #include "sound.h"
+#include "save_load.h"
 
 // ── Name edit state ───────────────────────────────────────────
 // cursor: 0=player1, 1=player2, 2=Start (default)
@@ -43,10 +44,11 @@ typedef struct {
     bool              ok_held;
     bool              confirm_exit;     // show "are you sure?" overlay on trail
     int               dead_player_idx;
+    bool              has_save;
 } App;
 
 // ── Forward declarations ──────────────────────────────────────
-static void draw_title      (Canvas* c, uint32_t ms);
+static void draw_title      (Canvas* c, uint32_t ms, bool has_save);
 static void draw_name_edit  (Canvas* c, const GameState* gs, const NameEditState* ne);
 static void draw_trail      (Canvas* c, const GameState* gs, bool confirm_exit);
 static void draw_fort_arrival (Canvas* c, const GameState* gs);
@@ -69,7 +71,7 @@ static void draw_callback(Canvas* c, void* ctx) {
     const GameState* gs = &app->gs;
 
     switch(gs->screen) {
-        case SCREEN_TITLE:     draw_title(c, app->anim_ms);                          break;
+        case SCREEN_TITLE:     draw_title(c, app->anim_ms, app->has_save);            break;
         case SCREEN_NAME_EDIT: draw_name_edit(c, gs, &app->name_edit);               break;
         case SCREEN_TRAIL:     draw_trail(c, gs, app->confirm_exit);               break;
         case SCREEN_EVENT:     event_draw(c, &app->active_event, gs);                break;
@@ -93,7 +95,7 @@ static int mountain_height(int x, float scroll, float amp, float freq, float pha
     return (int)h;
 }
 
-static void draw_title(Canvas* c, uint32_t ms) {
+static void draw_title(Canvas* c, uint32_t ms, bool has_save) {
     canvas_clear(c);
     canvas_set_color(c, ColorBlack);
 
@@ -135,7 +137,11 @@ static void draw_title(Canvas* c, uint32_t ms) {
     // Footer — year above prompt
     canvas_set_font(c, FontSecondary);
     canvas_draw_str_aligned(c, 64, 42, AlignCenter, AlignTop, "1848");
-    canvas_draw_str_aligned(c, 64, 55, AlignCenter, AlignTop, "PRESS OK TO START");
+    if(has_save) {
+        canvas_draw_str_aligned(c, 64, 55, AlignCenter, AlignTop, "OK:New  Dn:Continue");
+    } else {
+        canvas_draw_str_aligned(c, 64, 55, AlignCenter, AlignTop, "PRESS OK TO START");
+    }
 }
 
 // ── Name edit screen ──────────────────────────────────────────
@@ -913,6 +919,7 @@ int32_t oregon_trail_app(void* p) {
     app->hold_advance_ms = 0;
     app->ok_held         = false;
     app->dead_player_idx = -1;
+    app->has_save        = save_exists();
 
     // ── Main loop ─────────────────────────────────────────────
     while(app->gs.running) {
@@ -941,6 +948,21 @@ int32_t oregon_trail_app(void* p) {
                         app->gs.screen = SCREEN_NAME_EDIT;
                     if(is_press && ev.key == InputKeyBack)
                         app->gs.running = false;
+                    if(is_press && ev.key == InputKeyDown && app->has_save) {
+                        if(load_game(&app->gs, &app->dead_player_idx)) {
+                            day_init();
+                            hunt_init(&app->hunt);
+                            memset(&app->active_event, 0, sizeof(ActiveEvent));
+                            app->confirm_exit    = false;
+                            app->ok_held         = false;
+                            app->hold_advance_ms = 0;
+                            app->fort_cursor     = 0;
+                            app->map_page        = 0;
+                            app->rest_food_used  = 0;
+                        } else {
+                            app->has_save = false;
+                        }
+                    }
                     break;
 
                 case SCREEN_NAME_EDIT: {
@@ -991,6 +1013,8 @@ int32_t oregon_trail_app(void* p) {
                             if(ne->cursor < 3) ne->cursor++;
                         } else if(ev.key == InputKeyOk) {
                             if(ne->cursor == 2) {
+                                delete_save();
+                                app->has_save = false;
                                 game_reset(app);
                                 app->gs.screen = SCREEN_TRAIL;
                             } else if(ne->cursor == 3) {
@@ -1015,6 +1039,8 @@ int32_t oregon_trail_app(void* p) {
                     if(ev.key == InputKeyOk && is_press) {
                         if(app->confirm_exit) {
                             app->confirm_exit = false;
+                            save_game(&app->gs, app->dead_player_idx);
+                            app->has_save = true;
                             app->gs.screen = SCREEN_TITLE;
                         } else {
                             app->hold_advance_ms = 0;
