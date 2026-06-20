@@ -45,6 +45,7 @@ typedef struct {
     uint32_t spawn_timer_ms;
     uint32_t wolf_companion_timer; // ms until companion wolf spawns, 0=inactive
     bool     wolf_was_on_screen;   // true if wolf appeared — Back penalty applies
+    bool     fled_wolf;            // exited while wolf on screen (distinct from mauling)
     int      pending_sound;
 } HuntState;
 
@@ -54,4 +55,4 @@ void   hunt_update         (HuntState* h, uint32_t dt_ms, GameState* gs);
 void   hunt_fire           (HuntState* h, GameState* gs);
 void   hunt_back_penalty   (HuntState* h, GameState* gs); // wolf bite on early exit
 void   hunt_draw           (Canvas* c, const HuntState* h, const GameState* gs);
-void   hunt_draw_gored_card(Canvas* c, bool by_wolf);
+void   hunt_draw_gored_card(Canvas* c, bool by_wolf, bool fled);
